@@ -1,0 +1,18 @@
+spring:
+  jpa:
+    database: POSTGRESQL
+    hibernate:
+      ddl-auto: update
+
+  datasource:
+    platform: postgres
+    url: jdbc:postgresql://localhost:5432/shopiify2
+#    username: root
+#    password: password
+    driverClassName: org.postgresql.Driver
+
+
+shopiify:
+  app:
+    jwtSecret: supersecretstring
+    jwtExpirationMs: 900000
