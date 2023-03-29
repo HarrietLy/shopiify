@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+
 
 public class UserDetailsImpl implements UserDetails {
 
@@ -18,6 +18,7 @@ public class UserDetailsImpl implements UserDetails {
     private Long id;
     private String username;
     private String email;
+    private Long cartId;
 
     @JsonIgnore
     private String password;
@@ -62,6 +63,10 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public String getPassword(){
         return password;
+    }
+
+    public Long getCartId(){
+        return cartId;
     }
 
     @Override

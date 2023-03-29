@@ -10,8 +10,10 @@ import java.util.List;
 public class JwtResponseDTO {
     private String token;
 
-    private Long type;
+//    private Long type;
+    private Long userId;
     private String username;
     private String email;
     private List<String> role;
+//    private Long cartId;
 }

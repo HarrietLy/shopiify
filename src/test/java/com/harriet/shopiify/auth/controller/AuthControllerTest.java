@@ -6,8 +6,12 @@ import com.harriet.shopiify.auth.vo.LoginVO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -22,14 +26,17 @@ class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
+    @MockBean
     private AuthenticationManager authenticationManager;
 
     @Test
     public void harrietShouldSignInOK() throws Exception{
+        LoginVO loginVO = new LoginVO("harriet", "123343");
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginVO.getUsername(), loginVO.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         mockMvc.perform( MockMvcRequestBuilders
                         .post("/auth/signin")
-                        .content(asJsonString(new LoginVO("harriet", "123343")))
+                        .content(asJsonString(loginVO))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
