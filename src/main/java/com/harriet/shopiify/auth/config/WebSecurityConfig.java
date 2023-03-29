@@ -4,6 +4,7 @@ import com.harriet.shopiify.auth.jwt.AuthEntryPointJwt;
 import com.harriet.shopiify.auth.jwt.AuthTokenFilter;
 import com.harriet.shopiify.auth.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -56,9 +57,11 @@ public class WebSecurityConfig {
         http.cors().and().csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .authorizeHttpRequests().requestMatchers("/api/auth/**").permitAll()
+//                .authorizeHttpRequests().requestMatchers("/api/auth/**").permitAll()
+                .authorizeHttpRequests().requestMatchers("/api/**").permitAll()
 //                .antMatchers("/api/test/**").permitAll()
-                .anyRequest().authenticated();
+//                .anyRequest().authenticated();
+                .anyRequest().permitAll();
 
         http.authenticationProvider(authenticationProvider());
 
