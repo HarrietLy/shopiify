@@ -1,6 +1,7 @@
 package com.harriet.shopiify.order.model;
 
 import com.harriet.shopiify.auth.model.ShippingAddress;
+import com.harriet.shopiify.auth.model.User;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -17,7 +18,8 @@ public class Order {
 
 //    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 //    @JoinColumn(name = "user_id")
-//    private User user;
+    // TODO KIV if wanna associate with User entity so can fetch listof order upon login
+    private Long userId;
 
     private Double amount;
 
@@ -28,11 +30,12 @@ public class Order {
     private ShippingAddress shippingAddress;
 
     @OneToMany(mappedBy = "order")
-    private List<OrderItem> orderDetails;
+    private List<OrderItem> orderItems;
 
     private LocalDateTime createdDate;
 
     @ManyToOne
     @JoinColumn(name="order_status_id")
     private OrderStatus orderStatus;
+
 }

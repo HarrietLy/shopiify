@@ -1,6 +1,7 @@
 package com.harriet.shopiify.cart.controller;
 
 import com.harriet.shopiify.cart.dto.CartDTO;
+import com.harriet.shopiify.cart.model.CartItem;
 import com.harriet.shopiify.cart.model.CartItemKey;
 import com.harriet.shopiify.cart.service.CartService;
 import com.harriet.shopiify.cart.vo.CartItemAddVO;
@@ -25,13 +26,23 @@ public class CartController {
     }
 
     @PostMapping("/addToCart")
-    public CartItemKey addCartItemToCart(@RequestBody @Valid CartItemAddVO vo){
-        return cartService.addCartItemToCart(vo);
+    public CartItemKey addCartItemToCart(@RequestBody @Valid CartItemAddVO vo) throws Exception{
+        CartItemKey key = null;
+        try {
+            key = cartService.addCartItemToCart(vo);
+        } catch(Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return key;
     }
 
     @PutMapping("/cartItem")
-    public void updateCartItem(@RequestBody @Valid CartItemUpdateVO vo){
-        cartService.updateCartItem(vo);
+    public void updateCartItem(@RequestBody @Valid CartItemUpdateVO vo) throws Exception{
+        try {
+            cartService.updateCartItem(vo);
+        } catch (Exception e){
+            throw new Exception(e.getMessage());
+        }
     }
 
     @DeleteMapping("/cartItem")

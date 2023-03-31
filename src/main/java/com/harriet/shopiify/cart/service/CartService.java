@@ -13,6 +13,7 @@ import com.harriet.shopiify.product.model.Product;
 import com.harriet.shopiify.product.repository.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -74,7 +75,7 @@ public class CartService {
         return  createdCart.getId();
     }
 
-    public CartItemKey addCartItemToCart(CartItemAddVO vo){
+    public CartItemKey addCartItemToCart(CartItemAddVO vo) throws Exception{
         Cart cartToAdd = cartRepository.findByUserId(vo.getUserId());
         Long cartIdToAdd=null;
         if ( cartToAdd== null){
@@ -85,17 +86,23 @@ public class CartService {
         }
         vo.setCartId(cartIdToAdd);
         log.info("cartitem entity to save: {}",toCartItemEntity(vo));
+        if (!enoughStock(vo)){
+            throw new Exception("insufficient stock");
+        }
         CartItem createdCartItem = cartItemRepository.save(toCartItemEntity(vo));
         return  createdCartItem.getId();
     }
 
-    public void updateCartItem(CartItemUpdateVO vo){
+    public void updateCartItem(CartItemUpdateVO vo) throws Exception{
         log.info("CartItemUpdateVO: {}", vo);
         CartItemKey cartItemKey = toCartItemKey(vo.getCartId(),vo.getProductId());
         CartItem cartItemToUpdate = cartItemRepository.findById(cartItemKey).orElseThrow(()->new NoSuchElementException("Resource not found"));
         log.info("cartItemToUpdate before copy from vo: {}",cartItemToUpdate.getQuantity());
         cartItemToUpdate.setQuantity(vo.getQuantity());
         log.info("cartItemToUpdate after copy from vo: {}",cartItemToUpdate.getQuantity());
+        if (!enoughStock(vo)){
+            throw new Exception("insufficient stock");
+        }
         cartItemRepository.save(cartItemToUpdate);
     }
 
@@ -125,8 +132,10 @@ public class CartService {
         return entity;
     }
 
+    @Transactional // TODO why do I have to add transactional annotation for delete method?
     public void deleteCartItem(Long cartId, Long productId){
         CartItemKey cartItemKey = toCartItemKey(cartId, productId);
+        CartItem cartItemTDelete = cartItemRepository.findById(cartItemKey).orElseThrow(()->new NoSuchElementException("Resource not found"));
         cartItemRepository.deleteById(cartItemKey);
     }
 
@@ -135,5 +144,25 @@ public class CartService {
         cartItemKey.setCartId(cartId);
         cartItemKey.setProductId(productId);
         return cartItemKey;
+    }
+
+    private Boolean enoughStock ( CartItemAddVO vo){
+        // Dont not need to lock stock in cart because concurrent cart are allowed to have the same stock even if the total qty in carts exceeds stock
+        Long stock = productRepository.findById(vo.getProductId()).get().getStock();
+        if (vo.getQuantity()>stock){
+            return true;
+        } else{
+            return false;
+        }
+    }
+
+    private Boolean enoughStock ( CartItemUpdateVO vo){
+        // Dont not need to lock stock in cart because concurrent cart are allowed to have the same stock even if the total qty in carts exceeds stock
+        Long stock = productRepository.findById(vo.getProductId()).get().getStock();
+        if (vo.getQuantity()>stock){
+            return true;
+        } else{
+            return false;
+        }
     }
 }

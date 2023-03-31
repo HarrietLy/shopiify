@@ -21,7 +21,7 @@ public class ProductDTO implements Serializable {
 
     private String units;
 
-    private BigInteger stock;
+    private Long stock;
 
     private Double price;
 }
