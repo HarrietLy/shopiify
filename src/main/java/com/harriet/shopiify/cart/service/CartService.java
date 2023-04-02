@@ -68,10 +68,8 @@ public class CartService {
         Cart newCart =new Cart();
         newCart.setUserId(userId);
         newCart.setCreatedDate(currentDateTime);
-        newCart.setLastModifiedDate(currentDateTime);
-        log.info("newCart to create: {}", newCart);
         Cart createdCart = cartRepository.save(newCart);
-        log.info("createdCart: {}", createdCart);
+        log.info("createdCart id: {}", createdCart.getId());
         return  createdCart.getId();
     }
 
@@ -85,7 +83,6 @@ public class CartService {
             cartIdToAdd=cartToAdd.getId();
         }
         vo.setCartId(cartIdToAdd);
-        log.info("cartitem entity to save: {}",toCartItemEntity(vo));
         if (!enoughStock(vo)){
             throw new Exception("insufficient stock");
         }
@@ -115,7 +112,6 @@ public class CartService {
         entity.setQuantity(vo.getQuantity());
         CartItemKey cartItemKey = toCartItemKey(vo.getCartId(),vo.getProductId());
         entity.setId(cartItemKey);
-        log.info("cartItem entity after copy from vo: {}",entity);
         return entity;
     }
 
@@ -128,7 +124,6 @@ public class CartService {
         entity.setQuantity(vo.getQuantity());
         CartItemKey cartItemKey = toCartItemKey(vo.getCartId(),vo.getProductId());
         entity.setId(cartItemKey);
-        log.info("cartItem entity after copy from vo: {}",entity);
         return entity;
     }
 
@@ -149,7 +144,9 @@ public class CartService {
     private Boolean enoughStock ( CartItemAddVO vo){
         // Dont not need to lock stock in cart because concurrent cart are allowed to have the same stock even if the total qty in carts exceeds stock
         Long stock = productRepository.findById(vo.getProductId()).get().getStock();
-        if (vo.getQuantity()>stock){
+        log.info("stock before add to cart{}", stock);
+        log.info("quantity in cart: {}", vo.getQuantity());
+        if (vo.getQuantity() <= stock){
             return true;
         } else{
             return false;

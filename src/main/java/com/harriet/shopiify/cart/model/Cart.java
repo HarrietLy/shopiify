@@ -22,7 +22,7 @@ public class Cart {
 
     private LocalDateTime createdDate;
 
-    private LocalDateTime lastModifiedDate;
+//    private LocalDateTime lastModifiedDate;
 
     @OneToMany
     @JoinColumn(name="cart_id")

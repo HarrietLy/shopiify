@@ -21,7 +21,7 @@ public class Order {
     // TODO KIV if wanna associate with User entity so can fetch listof order upon login
     private Long userId;
 
-    private Double amount;
+    private Double productSubtotal;
 
     private Double shippingFee;
 
