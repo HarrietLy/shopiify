@@ -55,6 +55,9 @@ public class OrderService {
 
     private Long saveOrder(OrderCreateVO vo) throws Exception{
         log.info("creating new order");
+        if (vo.getOrderItems().isEmpty()){
+            throw new UnsupportedOperationException("cannot create new order with no order items");
+        }
         for ( OrderItemVO item : vo.getOrderItems()){
             log.info("cart id and product id: {}, {} ",vo.getCartId(), item.getProductId());
             Optional<CartItem> cartItem = cartItemRepository.findById(toCartItemKey(vo.getCartId(), item.getProductId()));

@@ -3,8 +3,9 @@ package com.harriet.shopiify.auth.repository;
 import com.harriet.shopiify.auth.model.ShippingAddress;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
+import java.util.List;
+
 
 public interface ShippingAddressRepository  extends JpaRepository<ShippingAddress, Long> {
-    Optional<ShippingAddress> findById(Long shippingAddressId);
+    List<ShippingAddress> findByUserId(Long userId);
 }

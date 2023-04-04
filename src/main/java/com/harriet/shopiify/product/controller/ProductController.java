@@ -3,7 +3,6 @@ package com.harriet.shopiify.product.controller;
 import com.harriet.shopiify.product.dto.ProductDTO;
 import com.harriet.shopiify.product.service.ProductService;
 import com.harriet.shopiify.product.vo.ProductVO;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

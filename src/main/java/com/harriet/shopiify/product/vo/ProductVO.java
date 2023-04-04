@@ -37,7 +37,7 @@ public class ProductVO {
 
     @NotNull
     @Min(value = 0L, message = "The value must be positive")
-    private BigInteger stock;
+    private Long stock;
 
     @NotNull
     @Min(value = 0, message = "The value must be positive")

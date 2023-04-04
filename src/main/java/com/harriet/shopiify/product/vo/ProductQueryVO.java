@@ -14,6 +14,6 @@ public class ProductQueryVO implements Serializable {
 
     private Long productStatusId;
 
-    private BigInteger stock;
+    private Long stock;
 
 }
