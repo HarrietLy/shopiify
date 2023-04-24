@@ -50,7 +50,7 @@ public class OrderService {
     private Long saveOrder(OrderCreateVO vo) {
         log.info("creating new order");
         if (vo.getOrderItems().isEmpty()){
-            throw new UnsupportedOperationException("cannot create new order with no order items");
+            throw new IllegalArgumentException("cannot create new order with no order items");
         }
         for ( OrderItemVO item : vo.getOrderItems()){
             log.info("cart id and product id: {}, {} ",item.getCartId(), item.getProductId());
@@ -67,13 +67,9 @@ public class OrderService {
 
     private void saveOrderItems (OrderCreateVO vo) {
         log.info("saving order items to the created order");
-        try {
-            Long createdOrderId = saveOrder(vo);
-            vo.getOrderItems().forEach(item ->
-                    orderItemRepository.save(toOrderItemEntity(item, createdOrderId)));
-        } catch (Exception e){
-            throw new RuntimeException("Exception occured in saveOrderItems, "+e.getMessage());
-        }
+        Long createdOrderId = saveOrder(vo);
+        vo.getOrderItems().forEach(item ->
+                orderItemRepository.save(toOrderItemEntity(item, createdOrderId)));
     }
 
     private void deleteCartItems (OrderCreateVO vo){
@@ -177,7 +173,7 @@ public class OrderService {
         Long currentOrderStatusId = orderToSave.getOrderStatus().getId();
         log.info("currentOrderStatusId{}", currentOrderStatusId);
         if (currentOrderStatusId==3){
-            throw new UnsupportedOperationException("Order that is already cancelled, cannot be further updated");
+            throw new IllegalArgumentException("Order that is already cancelled, cannot be further updated");
         }
         orderToSave.setOrderStatus(orderStatusRepository.findById(orderStatusId).get());
         orderRepository.save(orderToSave);
