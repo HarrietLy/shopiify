@@ -10,8 +10,8 @@ spring:
 #    username: root
 #    password: password
     driverClassName: org.postgresql.Driver
-#  security:
-#    enabled: false
+  security:
+    enabled: true
 
 shopiify:
   app:

@@ -73,7 +73,7 @@ public class CartService {
         return  createdCart.getId();
     }
 
-    public CartItemKey addCartItemToCart(CartItemAddVO vo) throws Exception{
+    public CartItemKey addCartItemToCart(CartItemAddVO vo) {
         Cart cartToAdd = cartRepository.findByUserId(vo.getUserId());
         Long cartIdToAdd=null;
         if ( cartToAdd== null){
@@ -84,7 +84,7 @@ public class CartService {
         }
         vo.setCartId(cartIdToAdd);
         if (!enoughStock(vo)){
-            throw new Exception("insufficient stock");
+            throw new RuntimeException("insufficient stock");
         }
         CartItem createdCartItem = cartItemRepository.save(toCartItemEntity(vo));
         return  createdCartItem.getId();

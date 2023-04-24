@@ -25,14 +25,15 @@ public class CartController {
         return cartService.getCartByUserId(userId);
     }
 
+    // TODO: ideally should not throw exceptions since all callers must handle
     @PostMapping("/addToCart")
-    public CartItemKey addCartItemToCart(@RequestBody @Valid CartItemAddVO vo) throws Exception{
+    public CartItemKey addCartItemToCart(@RequestBody @Valid CartItemAddVO vo) {
         CartItemKey key = null;
-        try {
+//        try {
             key = cartService.addCartItemToCart(vo);
-        } catch(Exception e) {
-            throw new Exception(e.getMessage());
-        }
+//        } catch(Exception e) {
+//            throw new Exception(e.getMessage());
+//        }
         return key;
     }
 

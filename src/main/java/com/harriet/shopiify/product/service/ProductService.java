@@ -7,6 +7,7 @@ import com.harriet.shopiify.product.model.ProductStatus;
 import com.harriet.shopiify.product.repository.CategoryRepository;
 import com.harriet.shopiify.product.repository.ProductRepository;
 import com.harriet.shopiify.product.repository.ProductStatusRepository;
+import com.harriet.shopiify.product.vo.ProductQueryVO;
 import com.harriet.shopiify.product.vo.ProductUpdateVO;
 import com.harriet.shopiify.product.vo.ProductVO;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +38,6 @@ public class ProductService {
         return createdEntity.getId();
     }
 
-
     public void deleteProduct(long productId){
         productRepository.deleteById(productId);
     }
@@ -47,6 +47,10 @@ public class ProductService {
         BeanUtils.copyProperties(toEntity(vo),entityToUpdate);
     }
 
+    public List<ProductDTO> query (ProductQueryVO vo){
+        List<Product> entities= productRepository.findByCondition(vo.getProductName(), vo.getCategoryId(),vo.getCategoryId(), vo.getStock());
+        return entities.stream().map(bean->toDTO(bean)).collect(Collectors.toList());
+    }
     public ProductDTO findProductById(long productId){
         Product entity = productRepository.findById(productId).orElseThrow(()->new NoSuchElementException("No product found"));
         return toDTO(entity);

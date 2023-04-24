@@ -18,7 +18,6 @@ import com.harriet.shopiify.product.model.Product;
 import com.harriet.shopiify.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,61 +39,46 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
 
     @Transactional
-    public Long createOrder(OrderCreateVO vo) throws Exception{
-        Long createdOrderId = null;
-        try{
-            createdOrderId = saveOrder(vo);
-            saveOrderItems(vo);
-            deleteCartItems(vo);
-            reduceStockByOrderedQty(vo);
-        } catch(Exception e){
-            throw new Exception(e.getMessage());
-        }
+    public Long createOrder(OrderCreateVO vo) {
+        Long createdOrderId = saveOrder(vo);
+        saveOrderItems(vo);
+        deleteCartItems(vo);
+        reduceStockByOrderedQty(vo);
         return createdOrderId;
     }
 
-    private Long saveOrder(OrderCreateVO vo) throws Exception{
+    private Long saveOrder(OrderCreateVO vo) {
         log.info("creating new order");
         if (vo.getOrderItems().isEmpty()){
             throw new UnsupportedOperationException("cannot create new order with no order items");
         }
         for ( OrderItemVO item : vo.getOrderItems()){
-            log.info("cart id and product id: {}, {} ",vo.getCartId(), item.getProductId());
-            Optional<CartItem> cartItem = cartItemRepository.findById(toCartItemKey(vo.getCartId(), item.getProductId()));
-            Boolean itemInCart = cartItem.isPresent();
-            log.info("itemInCart: {} ", itemInCart);
-            Boolean orderQtySameInCart = itemInCart ? cartItem.get().getQuantity()==item.getQuantity() : false;
-            log.info("cartItem.get().getQuantity() {}",cartItem.get().getQuantity());
-            log.info("item.getQuantity() {}", item.getQuantity());
-            log.info("orderQtySameInCart: {} ", orderQtySameInCart);
-            if (!itemInCart || !orderQtySameInCart){
-                throw new Exception("ordered item does not match cart time for item: " + item.getProductId());
-            }
-            // TODO: lock the variable stock so concurrent order creation on the same product is not allowed
+            log.info("cart id and product id: {}, {} ",item.getCartId(), item.getProductId());
+            Optional<CartItem> cartItem = cartItemRepository.findById(toCartItemKey(item.getCartId(), item.getProductId()));
             Long stock = productRepository.findById(item.getProductId()).get().getStock();
             log.info("stock: {}", stock);
-            if (item.getQuantity()> stock){
-                throw new Exception("order creation cannot proceed, insufficient stock for "+ item.getProductId());
+            if (cartItem.get().getQuantity()> stock){
+                throw new RuntimeException("order creation cannot proceed, insufficient stock for "+ item.getProductId());
             }
         }
         Order createdOrder =orderRepository.save(toOrderEntity(vo));
         return createdOrder.getId();
     }
 
-    private void saveOrderItems (OrderCreateVO vo) throws Exception{
+    private void saveOrderItems (OrderCreateVO vo) {
         log.info("saving order items to the created order");
         try {
             Long createdOrderId = saveOrder(vo);
             vo.getOrderItems().forEach(item ->
                     orderItemRepository.save(toOrderItemEntity(item, createdOrderId)));
         } catch (Exception e){
-            throw new Exception("Exception occured in saveOrderItems, "+e.getMessage());
+            throw new RuntimeException("Exception occured in saveOrderItems, "+e.getMessage());
         }
     }
 
     private void deleteCartItems (OrderCreateVO vo){
         log.info("removing ordered item from cart");
-        vo.getOrderItems().forEach(item -> cartItemRepository.deleteById(toCartItemKey(vo.getCartId(),item.getProductId())));
+        vo.getOrderItems().forEach(item -> cartItemRepository.deleteById(toCartItemKey(item.getCartId(),item.getProductId())));
     }
 
     private CartItemKey toCartItemKey (Long cartId, Long productId){
@@ -104,18 +88,18 @@ public class OrderService {
         return cartItemKey;
     }
 
-    private void reduceStockByOrderedQty(OrderCreateVO vo) throws  Exception{
+    private void reduceStockByOrderedQty(OrderCreateVO vo) {
         log.info("reducing stock by the ordered quantity");
         List<OrderItemVO> orderItems = vo.getOrderItems();
         for (OrderItemVO item : orderItems) {
             Product product = productRepository.findById(item.getProductId()).get();
-            // TODO: need to lock the current stock? so no concurrent reduction is allowed?
             Long currentStock = product.getStock();
-            Long delta = currentStock - item.getQuantity();
-            if (delta >= 0) {
-                product.setStock(delta);
+            Long orderedQuantity = cartItemRepository.findById(toCartItemKey(item.getCartId(), item.getProductId())).get().getQuantity();
+            Long remainingStock = currentStock - orderedQuantity;
+            if (remainingStock >= 0) {
+                product.setStock(remainingStock);
             } else {
-                throw new Exception("current stock is smaller than ordered quantity");
+                throw new RuntimeException("insufficient stock for the ordered quantity");
             }
         }
     }
@@ -129,7 +113,8 @@ public class OrderService {
         entity.setOrderStatus(orderStatusRepository.findById(1L).get());
         Double totalAmount = 0.0;
         for (OrderItemVO item : vo.getOrderItems()){
-            totalAmount = totalAmount + productRepository.findById(item.getProductId()).get().getPrice()*item.getQuantity();
+            CartItem cartItem = cartItemRepository.findById(toCartItemKey(item.getCartId(), item.getProductId())).get();
+            totalAmount = totalAmount + productRepository.findById(item.getProductId()).get().getPrice() * cartItem.getQuantity();
         }
         log.info("total amount: {}", totalAmount);
         entity.setProductSubtotal(totalAmount);
@@ -142,10 +127,11 @@ public class OrderService {
         orderItem.setOrder(orderRepository.findById(orderId).get());
         log.info("order id to get order to set order to ordertime: {}",orderRepository.findById(orderId).get().getId() );
         Product product =productRepository.findById(vo.getProductId()).get();
+        CartItem cartItem = cartItemRepository.findById(toCartItemKey(vo.getCartId(), vo.getProductId())).get();
         orderItem.setPrice(product.getPrice());
         log.info("price captured at sale: {}", product.getPrice());
         orderItem.setProduct(product);
-        orderItem.setQuantity(vo.getQuantity());
+        orderItem.setQuantity(cartItem.getQuantity());
         orderItem.setId(toOrderItemKey(orderId,product.getId()));
         return orderItem;
     }
@@ -186,7 +172,7 @@ public class OrderService {
         return key;
     }
 
-    public void updateOrderStatus (long orderId, long orderStatusId) throws Exception{
+    public void updateOrderStatus (long orderId, long orderStatusId) {
         Order orderToSave = orderRepository.findById(orderId).get();
         Long currentOrderStatusId = orderToSave.getOrderStatus().getId();
         log.info("currentOrderStatusId{}", currentOrderStatusId);

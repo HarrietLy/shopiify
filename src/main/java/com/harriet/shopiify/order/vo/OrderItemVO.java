@@ -8,8 +8,8 @@ import javax.validation.constraints.NotNull;
 public class OrderItemVO {
 
     @NotNull
-    private Long productId;
+    private Long cartId;
 
     @NotNull
-    private Long quantity;
+    private Long productId;
 }
