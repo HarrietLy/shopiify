@@ -20,6 +20,6 @@ public class CartItemAddVO {
     private Long productId;
 
     @NotNull
-    @Min(value = 0L, message = "The value must be positive")
+    @Min(value = 1L, message = "The value must be an integer larger than 1")
     private Long quantity;
 }

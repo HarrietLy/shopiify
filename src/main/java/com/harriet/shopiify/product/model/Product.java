@@ -31,7 +31,7 @@ public class Product {
     private String units;
 
     @Min(value = 0L, message = "The value must be a positive integer")
-    private BigInteger stock;
+    private Long stock;
 
     @Min(value = 0, message = "The value must be a positive number")
     private Double price;

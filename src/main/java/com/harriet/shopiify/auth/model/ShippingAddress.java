@@ -12,8 +12,8 @@ public class ShippingAddress {
     private Long id;
 
     @Column(name="user_id")
-    @JoinColumn(name="user_id")
-    private String userId;
+//    @JoinColumn(name="user_id")
+    private Long userId;
 
     @Column(name="shipping_address")
     private String shippingAddress;

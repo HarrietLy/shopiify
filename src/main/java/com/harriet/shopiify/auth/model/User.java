@@ -32,9 +32,9 @@ public class User {
 //    @JoinColumn(name="cart_id")
 //    private Cart cart;
 
-    @OneToMany
-    @JoinColumn(name="user_id")
-    private List<Order> orders = new ArrayList<>();
+    // TODO check if should remove this association to make the association unidirection instead
+//    @OneToMany(mappedBy="user")
+//    private List<Order> orders = new ArrayList<>();
 
     public User() {
     }
@@ -44,7 +44,7 @@ public class User {
         this.password = password;
         this.role = role;
 //        this.cart = cart;
-        this.orders = orders;
+//        this.orders = orders;
     }
 
     public Long getId() {
@@ -95,13 +95,13 @@ public class User {
 //        this.cart = cart;
 //    }
 
-    public List<Order> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(List<Order> orders) {
-        this.orders = orders;
-    }
+//    public List<Order> getOrders() {
+//        return orders;
+//    }
+//
+//    public void setOrders(List<Order> orders) {
+//        this.orders = orders;
+//    }
 
 
 

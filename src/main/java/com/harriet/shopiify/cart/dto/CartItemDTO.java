@@ -20,7 +20,7 @@ public class CartItemDTO {
 
     private String units;
 
-    private BigInteger stock;
+    private Long stock;
 
     private Double price;
 

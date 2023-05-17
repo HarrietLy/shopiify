@@ -1,11 +1,8 @@
 package com.harriet.shopiify.product.dto;
 
-import com.harriet.shopiify.product.model.Category;
-import com.harriet.shopiify.product.model.ProductStatus;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 
 @Data
 public class ProductDTO implements Serializable {
@@ -21,7 +18,7 @@ public class ProductDTO implements Serializable {
 
     private String units;
 
-    private BigInteger stock;
+    private Long stock;
 
     private Double price;
 }

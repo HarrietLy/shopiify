@@ -10,6 +10,8 @@ import com.harriet.shopiify.auth.repository.UserRepository;
 import com.harriet.shopiify.auth.service.UserDetailsImpl;
 import com.harriet.shopiify.auth.vo.LoginVO;
 import com.harriet.shopiify.auth.vo.SignupVO;
+//import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/auth")
 @Slf4j
+@Tag(name="authentication")
 public class AuthController {
 
     @Autowired

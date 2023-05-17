@@ -1,7 +1,6 @@
 package com.harriet.shopiify.cart.service;
 
 import com.harriet.shopiify.cart.dto.CartDTO;
-import com.harriet.shopiify.cart.dto.CartItemDTO;
 import com.harriet.shopiify.cart.model.Cart;
 import com.harriet.shopiify.cart.model.CartItem;
 import com.harriet.shopiify.cart.model.CartItemKey;
@@ -13,10 +12,9 @@ import com.harriet.shopiify.product.model.Product;
 import com.harriet.shopiify.product.repository.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -34,47 +32,24 @@ public class CartService {
 
     public CartDTO getCartByUserId (Long userId){
         Cart entity = cartRepository.findByUserId(userId);
-        return toCartDTO(entity);
+        return entity.toCartDTO();
     }
 
-    private CartDTO toCartDTO ( Cart cart){
-        List<CartItem> cartItemList = cart.getCartItems();
-        List<CartItemDTO> cartItemDTOList = new ArrayList<>();
-        cartItemList.forEach(cartItem -> cartItemDTOList.add(toCartItemDTO(cartItem)));
-        CartDTO cartDTO = new CartDTO();
-        cartDTO.setCartId(cart.getId());
-        cartDTO.setUserId(cart.getUserId());
-        cartDTO.setCartItems(cartItemDTOList);
-        return cartDTO;
+    public CartItem getCartItemById (Long cartId, Long productId){
+        CartItem cartItem = cartItemRepository.findById(new CartItemKey(cartId, productId)).orElseThrow(()->new NoSuchElementException("Resource not found"));
+        return cartItem;
     }
 
-    private CartItemDTO toCartItemDTO (CartItem cartItem){
-        CartItemDTO dto = new CartItemDTO();
-        dto.setProductId(cartItem.getProduct().getId());
-        dto.setCategory(cartItem.getProduct().getCategory().getCategory());
-        dto.setProductStatus(cartItem.getProduct().getProductStatus().getStatus());
-        dto.setDescription(cartItem.getProduct().getDescription());
-        dto.setPrice(cartItem.getProduct().getPrice());
-        dto.setProductName(cartItem.getProduct().getProductName());
-        dto.setStock(cartItem.getProduct().getStock());
-        dto.setUnits(cartItem.getProduct().getUnits());
-        dto.setQuantity(cartItem.getQuantity());
-        return dto;
-    }
 
     private Long createCart(Long userId){
         LocalDateTime currentDateTime = LocalDateTime.now();
-        Cart newCart =new Cart();
-        newCart.setUserId(userId);
-        newCart.setCreatedDate(currentDateTime);
-        newCart.setLastModifiedDate(currentDateTime);
-        log.info("newCart to create: {}", newCart);
-        Cart createdCart = cartRepository.save(newCart);
-        log.info("createdCart: {}", createdCart);
+        log.info("currentDateTime: {}",currentDateTime );
+        Cart createdCart = cartRepository.save(new Cart(userId, currentDateTime));
+        log.info("createdCart id: {}", createdCart.getId());
         return  createdCart.getId();
     }
 
-    public CartItemKey addCartItemToCart(CartItemAddVO vo){
+    public CartItemKey addCartItemToCart(CartItemAddVO vo) {
         Cart cartToAdd = cartRepository.findByUserId(vo.getUserId());
         Long cartIdToAdd=null;
         if ( cartToAdd== null){
@@ -84,56 +59,65 @@ public class CartService {
             cartIdToAdd=cartToAdd.getId();
         }
         vo.setCartId(cartIdToAdd);
-        log.info("cartitem entity to save: {}",toCartItemEntity(vo));
-        CartItem createdCartItem = cartItemRepository.save(toCartItemEntity(vo));
+        if (!enoughStock(vo)){
+            throw new RuntimeException("insufficient stock");
+        }
+        Product product = productRepository.findById(vo.getProductId()).get();
+        Cart cart = cartRepository.findById(vo.getCartId()).get();
+        CartItem createdCartItem = cartItemRepository.save( new CartItem(product, cart, vo.getQuantity()));
         return  createdCartItem.getId();
     }
 
-    public void updateCartItem(CartItemUpdateVO vo){
+    public void updateCartItem(CartItemUpdateVO vo) throws Exception{
         log.info("CartItemUpdateVO: {}", vo);
-        CartItemKey cartItemKey = toCartItemKey(vo.getCartId(),vo.getProductId());
-        CartItem cartItemToUpdate = cartItemRepository.findById(cartItemKey).orElseThrow(()->new NoSuchElementException("Resource not found"));
+        CartItem cartItemToUpdate = getCartItemById(vo.getCartId(),vo.getProductId());
         log.info("cartItemToUpdate before copy from vo: {}",cartItemToUpdate.getQuantity());
         cartItemToUpdate.setQuantity(vo.getQuantity());
         log.info("cartItemToUpdate after copy from vo: {}",cartItemToUpdate.getQuantity());
+        if (!enoughStock(vo)){
+            throw new Exception("insufficient stock");
+        }
         cartItemRepository.save(cartItemToUpdate);
     }
 
-    private CartItem toCartItemEntity (CartItemAddVO vo){
-        CartItem entity = new CartItem();
-        Product product = productRepository.findById(vo.getProductId()).get();
-        Cart cart = cartRepository.findById(vo.getCartId()).get();
-        entity.setProduct(product);
-        entity.setCart(cart);
-        entity.setQuantity(vo.getQuantity());
-        CartItemKey cartItemKey = toCartItemKey(vo.getCartId(),vo.getProductId());
-        entity.setId(cartItemKey);
-        log.info("cartItem entity after copy from vo: {}",entity);
-        return entity;
-    }
 
-    private CartItem toCartItemEntity (CartItemUpdateVO vo){
-        CartItem entity = new CartItem();
-        Product product = productRepository.findById(vo.getProductId()).get();
-        Cart cart = cartRepository.findById(vo.getCartId()).get();
-        entity.setProduct(product);
-        entity.setCart(cart);
-        entity.setQuantity(vo.getQuantity());
-        CartItemKey cartItemKey = toCartItemKey(vo.getCartId(),vo.getProductId());
-        entity.setId(cartItemKey);
-        log.info("cartItem entity after copy from vo: {}",entity);
-        return entity;
-    }
-
+    @Transactional
     public void deleteCartItem(Long cartId, Long productId){
-        CartItemKey cartItemKey = toCartItemKey(cartId, productId);
-        cartItemRepository.deleteById(cartItemKey);
+        cartItemRepository.deleteById(new CartItemKey(cartId,productId));
     }
 
-    private CartItemKey toCartItemKey (Long cartId, Long productId){
-        CartItemKey cartItemKey = new CartItemKey();
-        cartItemKey.setCartId(cartId);
-        cartItemKey.setProductId(productId);
-        return cartItemKey;
+    private Boolean enoughStock ( CartItemAddVO vo){
+        // Dont not need to lock stock in cart because concurrent cart are allowed to have the same stock even if the total qty in carts exceeds stock
+        Long stock = productRepository.findById(vo.getProductId()).get().getStock();
+        log.info("stock before add to cart: {}", stock);
+        log.info("quantity in cart: {}", vo.getQuantity());
+        if (vo.getQuantity() <= stock){
+            return true;
+        } else{
+            return false;
+        }
+    }
+
+    private Boolean enoughStock ( CartItemUpdateVO vo){
+        Long stock = productRepository.findById(vo.getProductId()).get().getStock();
+        log.info("current stock: {}", stock);
+        if (vo.getQuantity()<=stock){
+            return true;
+        } else{
+            return false;
+        }
     }
 }
+
+//    private CartItem toCartItemEntity (CartItemAddVO vo){
+//        CartItem entity = new CartItem();
+//        Product product = productRepository.findById(vo.getProductId()).get();
+//        Cart cart = cartRepository.findById(vo.getCartId()).get();
+//        entity.setProduct(product);
+//        entity.setCart(cart);
+//        entity.setQuantity(vo.getQuantity());
+//        CartItemKey cartItemKey =  new CartItemKey(vo.getCartId(),vo.getProductId());
+//        entity.setId(cartItemKey);
+//        return entity;
+//    }
+

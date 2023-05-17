@@ -1,5 +1,6 @@
 package com.harriet.shopiify.product.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -14,6 +15,6 @@ public class ProductQueryVO implements Serializable {
 
     private Long productStatusId;
 
-    private BigInteger stock;
+    private Long stock;
 
 }
