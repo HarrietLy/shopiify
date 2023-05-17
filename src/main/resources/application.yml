@@ -1,3 +1,5 @@
+#server:
+#  port: 8098
 spring:
   jpa:
     database: POSTGRESQL
@@ -6,14 +8,14 @@ spring:
 
   datasource:
     platform: postgres
-    url: jdbc:postgresql://localhost:5432/shopiify2
-#    username: root
-#    password: password
-    driverClassName: org.postgresql.Driver
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+#    driverClassName: org.postgresql.Driver
   security:
     enabled: true
 
 shopiify:
   app:
-    jwtSecret: supersecretstring
+    jwtSecret: ${jwtSecret}
     jwtExpirationMs: 900000
