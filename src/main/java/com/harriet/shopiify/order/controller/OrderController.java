@@ -4,6 +4,7 @@ import com.harriet.shopiify.cart.dto.CartDTO;
 import com.harriet.shopiify.order.dto.OrderDTO;
 import com.harriet.shopiify.order.service.OrderService;
 import com.harriet.shopiify.order.vo.OrderCreateVO;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/order")
 @RequiredArgsConstructor
+@Tag(name="order")
 public class OrderController {
 
     private final OrderService orderService;

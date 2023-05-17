@@ -4,12 +4,15 @@ import com.harriet.shopiify.auth.dto.ShippingAddressDTO;
 import com.harriet.shopiify.auth.service.ShippingAddressService;
 import com.harriet.shopiify.auth.vo.ShippingAddressUpdateVO;
 import com.harriet.shopiify.auth.vo.ShippingAddressVO;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/user/shippingAddress")
+@Tag(name="shippingAddress")
 public class ShippingAddressController {
     private final ShippingAddressService shippingAddressService;
     public ShippingAddressController(ShippingAddressService shippingAddressService) {
@@ -23,7 +26,7 @@ public class ShippingAddressController {
 
     @GetMapping("/{userId}")
     public List<ShippingAddressDTO> getShippingAddressByUserId(@PathVariable("userId") Long userId){
-        return shippingAddressService.findShippingAddByUserId(userId);
+        return shippingAddressService.findShippingAddressByUserId(userId);
     }
 
     @PutMapping("/{id}")

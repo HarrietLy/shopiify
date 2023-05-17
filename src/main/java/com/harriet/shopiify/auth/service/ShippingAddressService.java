@@ -34,7 +34,7 @@ public class ShippingAddressService {
         shippingAddressRepository.deleteById(id);
     }
 
-    public List<ShippingAddressDTO> findShippingAddByUserId ( Long userId){
+    public List<ShippingAddressDTO> findShippingAddressByUserId(Long userId){
         List<ShippingAddress> entities = shippingAddressRepository.findByUserId(userId);
         List<ShippingAddressDTO> dtos = new ArrayList<>();
         entities.forEach( entity ->{

@@ -1,5 +1,4 @@
 package com.harriet.shopiify.order.dto;
-import com.harriet.shopiify.auth.model.ShippingAddress;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -23,6 +22,7 @@ public class OrderDTO {
     private LocalDateTime createdDate;
 
     private String orderStatus;
+
 
 }
 

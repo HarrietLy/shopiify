@@ -3,12 +3,14 @@ package com.harriet.shopiify.product.controller;
 import com.harriet.shopiify.product.dto.CategoryDTO;
 import com.harriet.shopiify.product.service.CategoryService;
 import com.harriet.shopiify.product.vo.CategoryVO;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("api/product/category")
+@Tag(name="category")
 public class CategoryController {
     private final CategoryService categoryService;
 

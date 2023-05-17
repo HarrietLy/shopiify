@@ -6,6 +6,7 @@ import com.harriet.shopiify.cart.model.CartItemKey;
 import com.harriet.shopiify.cart.service.CartService;
 import com.harriet.shopiify.cart.vo.CartItemAddVO;
 import com.harriet.shopiify.cart.vo.CartItemUpdateVO;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/cart")
+@Tag(name="cart")
 public class CartController {
     private CartService cartService;
 
@@ -25,16 +27,9 @@ public class CartController {
         return cartService.getCartByUserId(userId);
     }
 
-    // TODO: ideally should not throw exceptions since all callers must handle
     @PostMapping("/addToCart")
     public CartItemKey addCartItemToCart(@RequestBody @Valid CartItemAddVO vo) {
-        CartItemKey key = null;
-//        try {
-            key = cartService.addCartItemToCart(vo);
-//        } catch(Exception e) {
-//            throw new Exception(e.getMessage());
-//        }
-        return key;
+        return cartService.addCartItemToCart(vo);
     }
 
     @PutMapping("/cartItem")
