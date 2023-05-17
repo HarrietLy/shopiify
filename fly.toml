@@ -1,6 +1,6 @@
-# fly.toml file generated for polished-feather-9828 on 2023-05-16T19:37:29+08:00
+# fly.toml file generated for shopiify on 2023-05-17T18:08:07+08:00
 
-app = "polished-feather-9828"
+app = "shopiify"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
