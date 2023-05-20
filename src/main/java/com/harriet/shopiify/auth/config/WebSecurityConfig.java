@@ -56,16 +56,16 @@ public class WebSecurityConfig {
         http.cors().and().csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-//                .authorizeHttpRequests().requestMatchers("/api/auth/**").permitAll()
-                .authorizeHttpRequests().requestMatchers("/api/**").permitAll()
+                .authorizeHttpRequests().requestMatchers("/api/auth/**").permitAll().and()
+                .authorizeHttpRequests().requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/swagger-resources/**", "/swagger-resources").permitAll()
+//                .authorizeHttpRequests().requestMatchers("/api/**").permitAll()
 //                .antMatchers("/api/test/**").permitAll()
-//                .anyRequest().authenticated();
-                .anyRequest().permitAll();
+                .anyRequest().authenticated();
+//                .anyRequest().permitAll();
 
         http.authenticationProvider(authenticationProvider());
-
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
+
 }
