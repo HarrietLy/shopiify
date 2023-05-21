@@ -59,10 +59,13 @@ public class CartService {
             cartIdToAdd=cartToAdd.getId();
         }
         vo.setCartId(cartIdToAdd);
-        if (!enoughStock(vo)){
+        Product product = productRepository.findById(vo.getProductId()).get();
+        if (product.getProductStatus().getId()==2){
+            throw new RuntimeException("cannot add to a cart an inactive product");
+        }
+        if (vo.getQuantity()> product.getStock()){
             throw new RuntimeException("insufficient stock");
         }
-        Product product = productRepository.findById(vo.getProductId()).get();
         Cart cart = cartRepository.findById(vo.getCartId()).get();
         CartItem createdCartItem = cartItemRepository.save( new CartItem(product, cart, vo.getQuantity()));
         return  createdCartItem.getId();
@@ -74,7 +77,11 @@ public class CartService {
         log.info("cartItemToUpdate before copy from vo: {}",cartItemToUpdate.getQuantity());
         cartItemToUpdate.setQuantity(vo.getQuantity());
         log.info("cartItemToUpdate after copy from vo: {}",cartItemToUpdate.getQuantity());
-        if (!enoughStock(vo)){
+        Product product = productRepository.findById(vo.getProductId()).get();
+        if (product.getProductStatus().getId()==2){
+            throw new RuntimeException("cannot update cart with an inactive product");
+        }
+        if (vo.getQuantity()>product.getStock()){
             throw new Exception("insufficient stock");
         }
         cartItemRepository.save(cartItemToUpdate);
@@ -86,27 +93,6 @@ public class CartService {
         cartItemRepository.deleteById(new CartItemKey(cartId,productId));
     }
 
-    private Boolean enoughStock ( CartItemAddVO vo){
-        // Dont not need to lock stock in cart because concurrent cart are allowed to have the same stock even if the total qty in carts exceeds stock
-        Long stock = productRepository.findById(vo.getProductId()).get().getStock();
-        log.info("stock before add to cart: {}", stock);
-        log.info("quantity in cart: {}", vo.getQuantity());
-        if (vo.getQuantity() <= stock){
-            return true;
-        } else{
-            return false;
-        }
-    }
-
-    private Boolean enoughStock ( CartItemUpdateVO vo){
-        Long stock = productRepository.findById(vo.getProductId()).get().getStock();
-        log.info("current stock: {}", stock);
-        if (vo.getQuantity()<=stock){
-            return true;
-        } else{
-            return false;
-        }
-    }
 }
 
 //    private CartItem toCartItemEntity (CartItemAddVO vo){

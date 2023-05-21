@@ -58,13 +58,16 @@ public class OrderService {
         for ( OrderItemVO item : vo.getOrderItems()){
             log.info("cart id and product id: {}, {} ",item.getCartId(), item.getProductId());
             CartItem cartItem = cartService.getCartItemById(item.getCartId(), item.getProductId());;
-
-            productSubtotal = productSubtotal + productRepository.findById(item.getProductId()).get().getPrice() * cartItem.getQuantity();
+            Product product = productRepository.findById(item.getProductId()).get();
+            productSubtotal = productSubtotal + product.getPrice() * cartItem.getQuantity();
 
             log.info("checking if this is enough stock for quantity in cart");
-            Long stock = productRepository.findById(item.getProductId()).get().getStock();
-            log.info("stock: {}", stock);
-            if (cartItem.getQuantity()> stock){
+
+            log.info("stock: {}", product.getStock());
+            if (product.getProductStatus().getId()==2){
+                throw new RuntimeException("cannot add an inactive product to order");
+            }
+            if (cartItem.getQuantity()> product.getStock()){
                 throw new RuntimeException("order creation cannot proceed, insufficient stock for "+ item.getProductId());
             }
 
