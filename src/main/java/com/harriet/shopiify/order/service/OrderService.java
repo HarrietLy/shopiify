@@ -62,7 +62,6 @@ public class OrderService {
             productSubtotal = productSubtotal + product.getPrice() * cartItem.getQuantity();
 
             log.info("checking if this is enough stock for quantity in cart");
-
             log.info("stock: {}", product.getStock());
             if (product.getProductStatus().getId()==2){
                 throw new RuntimeException("cannot add an inactive product to order");

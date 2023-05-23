@@ -9,7 +9,7 @@ spring:
     url: ${DATABASE_URL}
     username: ${DATABASE_USER}
     password: ${DATABASE_PASSWORD}
-#    driverClassName: org.postgresql.Driver
+    driverClassName: org.postgresql.Driver
   security:
     enabled: true
 

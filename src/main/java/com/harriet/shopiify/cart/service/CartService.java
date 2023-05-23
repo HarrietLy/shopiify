@@ -58,7 +58,7 @@ public class CartService {
         } else {
             cartIdToAdd=cartToAdd.getId();
         }
-        vo.setCartId(cartIdToAdd);
+//        vo.setCartId(cartIdToAdd);
         Product product = productRepository.findById(vo.getProductId()).get();
         if (product.getProductStatus().getId()==2){
             throw new RuntimeException("cannot add to a cart an inactive product");
@@ -66,7 +66,7 @@ public class CartService {
         if (vo.getQuantity()> product.getStock()){
             throw new RuntimeException("insufficient stock");
         }
-        Cart cart = cartRepository.findById(vo.getCartId()).get();
+        Cart cart = cartRepository.findById(cartIdToAdd).get();
         CartItem createdCartItem = cartItemRepository.save( new CartItem(product, cart, vo.getQuantity()));
         return  createdCartItem.getId();
     }
@@ -106,4 +106,3 @@ public class CartService {
 //        entity.setId(cartItemKey);
 //        return entity;
 //    }
-

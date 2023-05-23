@@ -16,18 +16,15 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 
 @OpenAPIDefinition(servers = {@Server(url = "/", description = "Default Server URL")})
 @Configuration
-
 public class SpringDocConfig {
 
-    @Bean
-    public GroupedOpenApi httpApi() {
-        return GroupedOpenApi.builder()
-                .group("http")
-                .pathsToMatch("/**")
-                .build();
-    }
     private final String moduleName = "shopiify";
     private final String apiVersion = "v1";
+
+//    @Bean
+//    public OpenAPI apiInfo() {
+//        return new OpenAPI().info(new Info().title(moduleName).version(apiVersion));
+//    }
 
     @Bean
     public OpenAPI customOpenAPI() {
@@ -46,4 +43,13 @@ public class SpringDocConfig {
                 )
                 .info(new Info().title(apiTitle).version(apiVersion));
     }
+
+    @Bean // this config is to get the swagger to call the endpoints following the format of the current running app, be it http(localhost) or https( eg after deployed on fly)
+    public GroupedOpenApi httpApi() {
+        return GroupedOpenApi.builder()
+                .group("http")
+                .pathsToMatch("/**")
+                .build();
+    }
+
 }
