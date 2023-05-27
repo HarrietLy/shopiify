@@ -1,0 +1,19 @@
+spring:
+  jpa:
+    database: POSTGRESQL
+    hibernate:
+      ddl-auto: none
+
+  datasource:
+    platform: postgres
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    driverClassName: org.postgresql.Driver
+  security:
+    enabled: true
+
+shopiify:
+  app:
+    jwtSecret: ${JWT_SECRET}
+    jwtExpirationMs: 900000

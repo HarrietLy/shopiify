@@ -13,7 +13,7 @@ public class CartItemAddVO {
     @NotBlank
     private Long userId;
 
-    private Long cartId;
+//    private Long cartId;
 
     @NotNull
     @NotBlank
